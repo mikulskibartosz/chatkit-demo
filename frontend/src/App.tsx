@@ -65,8 +65,13 @@ export default function App() {
   });
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <ChatKit control={control} className="h-[600px] max-w-[800px]" />
+    <main className="flex min-h-screen flex-col bg-white text-black">
+      <header className="border-b border-slate-200 px-6 py-4 text-xl font-semibold">
+        Ask mikulskibartosz.name
+      </header>
+      <div className="flex flex-1 justify-center p-6">
+        <ChatKit control={control} className="h-full max-w-[800px] flex-1" />
+      </div>
     </main>
   );
 }
