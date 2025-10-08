@@ -1,20 +1,29 @@
 # ChatKit Frontend
 
-This Vite + React client wraps the ChatKit web component in a slim list UI so you can focus on iterating with the backend agent. It mirrors the root README tone while surfacing the project paths and configuration you need day to day.
+This Vite + React client is served by the lightweight Node.js runtime in `server.mjs`. The same process handles `/api/chatkit/session`, keeping your OpenAI API key out of the browser while still delivering a minimal ChatKit demo.
 
 ## Quick Reference
 - App entry point: `src/main.tsx`
-- ChatKit config helper: `src/lib/config.ts`
-- Fact list UI: `src/App.tsx` and `src/components`
-- Styling: `src/index.css` (Tailwind layers)
+- ChatKit widget wrapper: `src/App.tsx`
+- Node/Vite server: `server.mjs`
 
 ## Requirements
 - Node.js 20+
-- Backend API running locally (defaults to `http://127.0.0.1:8000`).
+- `OPENAI_API_KEY` with access to ChatKit
+- `CHATKIT_WORKFLOW_ID` pointing at your workflow
+- `VITE_CHATKIT_API_DOMAIN_KEY` for domain allowlisting
 
 ## Environment Variables
 
-Optional overrides include `VITE_CHATKIT_API_URL` and `VITE_FACTS_API_URL`. If you change them, restart `npm run dev` so Vite reloads the new values.
+Create a `.env` file next to this README (or export the variables manually):
+
+```bash
+OPENAI_API_KEY=sk-proj-...
+CHATKIT_WORKFLOW_ID=wf_...
+VITE_CHATKIT_API_DOMAIN_KEY=domain_pk_local_dev
+```
+
+The domain key must match a value from the [ChatKit domain allowlist](https://platform.openai.com/settings/organization/security/domain-allowlist). Any placeholder works for local development if domain checks are disabled.
 
 ## Install & Run
 
@@ -23,8 +32,11 @@ npm install
 npm run dev
 ```
 
-The dev server is available at `http://127.0.0.1:5170`, which works for local development. To test remote access flows, you can temporarily expose the app with a tunnel (for example `ngrok http 5170`) after allowlisting that hostname.
+The dev server is available at `http://127.0.0.1:5170`. The same runtime proxies `/api/chatkit/session` to the OpenAI API. For production, build the app and run the server with the `--prod` flag:
 
-For production deployments, host the app on infrastructure you control behind a managed domain. Register that domain on the [domain allowlist page](https://platform.openai.com/settings/organization/security/domain-allowlist), add it to `frontend/vite.config.ts` under `server.allowedHosts`, and set the resulting key via `VITE_CHATKIT_API_DOMAIN_KEY`.
+```bash
+npm run build
+node server.mjs --prod
+```
 
-Need backend guidance? See the root README for FastAPI setup and domain allowlisting steps.
+Remember to add authentication or rate limiting before exposing the session endpoint to real traffic.
