@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server.mjs",
     "build": "vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx"
+    "preview": "node server.mjs --prod",
+    "lint": "eslint . --ext ts,tsx",
+    "vite": "vite"
   },
   "engines": {
     "node": ">=18.18",
