@@ -66,6 +66,7 @@ async function loadEnvFile() {
 
   try {
     const contents = await readFile(envPath, "utf8");
+    console.log(`Loading environment variables from ${envPath}`);
     for (const rawLine of contents.split(/\r?\n/u)) {
       const line = rawLine.trim();
       if (!line || line.startsWith("#")) {
@@ -82,10 +83,35 @@ async function loadEnvFile() {
         process.env[key] = value;
       }
     }
+    console.log("Environment variables loaded from file:",
+      Object.keys(process.env)
+        .filter((key) => !key.startsWith("npm_") && !key.startsWith("NODE_") && ["OPENAI_API_KEY", "CHATKIT_WORKFLOW_ID", "VITE_CHATKIT_API_DOMAIN_KEY"].includes(key))
+        .reduce((acc, key) => ({ ...acc, [key]: process.env[key] ? "[set]" : "[empty]" }), {})
+    );
   } catch (error) {
     if (error?.code !== "ENOENT") {
       console.warn("Failed to read .env file", error);
     }
+  }
+}
+
+function logRequest({ method, url: rawUrl, headers }) {
+  try {
+    console.log(
+      "Incoming request",
+      JSON.stringify(
+        {
+          method,
+          url: rawUrl,
+          host: headers.host,
+          userAgent: headers["user-agent"],
+        },
+        null,
+        2,
+      ),
+    );
+  } catch (error) {
+    console.warn("Failed to log request", error);
   }
 }
 
@@ -172,9 +198,12 @@ async function createServer() {
       return;
     }
 
+    logRequest(req);
+
     const url = new URL(req.url, `http://localhost:${port}`);
 
     if (req.method === "POST" && url.pathname === "/api/chatkit/session") {
+      console.log("Handling ChatKit session request for user", req.socket.remoteAddress);
       await handleChatKitSession(req, res);
       return;
     }
@@ -193,9 +222,14 @@ async function createServer() {
     }
 
     const safePath = sanitizePath(url.pathname);
-    if (!safePath) {
+    console.log("Resolved path", {
+      pathname: url.pathname,
+      safePath,
+    });
+    if (safePath === null) {
       res.statusCode = 403;
       res.end("Forbidden");
+      console.warn("Rejected request due to invalid path", url.pathname);
       return;
     }
 
@@ -210,6 +244,7 @@ async function createServer() {
       res.statusCode = 200;
       res.setHeader("Content-Type", getContentType(filePath));
       res.end(file);
+      console.log("Served static asset", filePath);
       return;
     } catch (error) {
       // Fall back to the SPA entry point.
@@ -218,6 +253,7 @@ async function createServer() {
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/html");
         res.end(html);
+        console.log("Served SPA fallback for", url.pathname);
         return;
       } catch (readError) {
         console.error("Failed to serve static asset", readError);
