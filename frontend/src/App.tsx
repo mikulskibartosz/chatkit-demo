@@ -65,8 +65,8 @@ export default function App() {
   });
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <ChatKit control={control} className="h-[600px] max-w-[800px]" />
+    <main className="flex min-h-screen justify-center bg-white p-4">
+      <ChatKit control={control} className="min-h-[600px] max-w-[800px]" />
     </main>
   );
 }
