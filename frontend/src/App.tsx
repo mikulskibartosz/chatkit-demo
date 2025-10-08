@@ -66,7 +66,7 @@ export default function App() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-      <ChatKit control={control} className="h-[600px] min-w-[800px]" />
+      <ChatKit control={control} className="h-[600px] max-w-[800px]" />
     </main>
   );
 }
