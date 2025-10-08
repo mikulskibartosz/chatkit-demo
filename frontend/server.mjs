@@ -226,7 +226,7 @@ async function createServer() {
       pathname: url.pathname,
       safePath,
     });
-    if (!safePath) {
+    if (safePath === null) {
       res.statusCode = 403;
       res.end("Forbidden");
       console.warn("Rejected request due to invalid path", url.pathname);
